@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 2: Respiration Pathways & Transport</title>
+    <style>
+        /* CSS Variables for Theme */
+        :root {
+            --primary: #c1121f; /* Blood Red for Circulatory theme */
+            --primary-dark: #780000;
+            --secondary: #003049; /* Deep Blue for Respiratory/O2 */
+            --accent: #fdf0d5; 
+            --success: #669bbc;
+            --danger: #d62828;
+            --light: #f8f9fa;
+            --dark: #1d3557;
+            --white: #ffffff;
+            --radius: 10px;
+            --shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Base Resets & Typography */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--secondary);
+            color: var(--white);
+            width: 100%;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-bottom: 4px solid var(--primary);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            padding: 2rem 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen Visibility Logic */
+        .screen {
+            display: none;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            border-bottom: 3px solid var(--success);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .instructions {
+            background: #eef2f3;
+            border-left: 5px solid var(--success);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 var(--primary-dark);
+            text-align: center;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--primary-dark);
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            box-shadow: 0 4px 0 #001a2c;
+        }
+        .btn-secondary:hover {
+            box-shadow: 0 2px 0 #001a2c;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* Module 1: Flowchart Sequence */
+        .sequence-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .sequence-item {
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            gap: 15px;
+            transition: 0.2s;
+        }
+
+        .sequence-item:hover {
+            border-color: var(--primary);
+            background: #fff;
+        }
+
+        .sequence-item select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 2px solid var(--secondary);
+            font-weight: bold;
+            color: var(--secondary);
+            cursor: pointer;
+            background: var(--white);
+        }
+
+        .sequence-item span {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        /* Module 2: Comparative Matrix */
+        .matrix-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .matrix-card {
+            background: var(--white);
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .matrix-card-header {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 12px 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .matrix-card-body {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: #f4f6f8;
+        }
+
+        .matrix-field label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .matrix-field select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        /* Module 3: Misconceptions */
+        .quiz-item {
+            margin-bottom: 25px;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .quiz-item label.question {
+            display: block;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light);
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .radio-label:hover {
+            border-color: var(--success);
+            background: #eaf4f4;
+        }
+
+        input[type="radio"] {
+            transform: scale(1.2);
+            accent-color: var(--primary);
+        }
+
+        /* Results Screen */
+        #score-display {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        .feedback-box {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .feedback-box.pass { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+        .feedback-box.fail { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+
+        /* Game Container */
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            background: #2b0b0b; /* Deep vascular red */
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 450px;
+            touch-action: none;
+            background: radial-gradient(circle at center, #660708, #370617, #03045e);
+        }
+
+        .game-hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--white);
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 2px 2px 4px #000;
+            pointer-events: none;
+        }
+
+        .game-inventory {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            pointer-events: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .game-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 48, 73, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .game-overlay.active {
+            display: flex;
+        }
+
+        .controls-hint {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #555;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .matrix-card-body { grid-template-columns: 1fr; }
+            .nav-buttons { flex-direction: column; }
+            .nav-buttons .btn { width: 100%; margin-top: 10px; }
+            canvas { height: 400px; }
+            header h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Bio-Energy Lab 02</h1>
+        <p>Organismal Transport & Respiration Pathways</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- WELCOME SCREEN -->
+        <div id="screen-welcome" class="screen active">
+            <h2>Welcome, Metabolic Engineer!</h2>
+            <p>Today you will map out how organisms transport matter—like glucose and oxygen—from macroscopic organ systems down to microscopic cellular organelles.</p>
+            <p><strong>Your Mission:</strong> Complete all 3 prep modules regarding Systemic Flow, Cellular Organelles (Eukaryote vs. Prokaryote), and Respiration Types (Aerobic vs. Anaerobic). </p>
+            <p>Score <strong>80% or higher</strong> to unlock access to <em>The Vascular Expressway</em> simulation relay.</p>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn" onclick="navTo('screen-mod1')">Begin Modules ➔</button>
+            </div>
+        </div>
+
+        <!-- MODULE 1: SYSTEMIC TRANSPORT FLOWCHART -->
+        <div id="screen-mod1" class="screen">
+            <h2>Module 1: Systemic Expressway</h2>
+            <div class="instructions">
+                <strong>Task:</strong> Order the steps of the organismal transport and cellular mechanics pathway from 1 (First) to 5 (Last).
+            </div>
+            
+            <div class="sequence-list" id="seq-list">
+                <!-- Randomized via HTML, but logic handled in JS by reading values -->
+                <div class="sequence-item">
+                    <select id="seq_blood"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+                    <span>Blood transports glucose & oxygen to tissue cells via capillaries.</span>
+                </div>
+                <div class="sequence-item">
+                    <select id="seq_waste"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+                    <span>Energy (ATP/Heat) is released, and CO2 / H2O waste is produced.</span>
+                </div>
+                <div class="sequence-item">
+                    <select id="seq_digest"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+                    <span>Animal eats food, digesting biomolecules into simple glucose.</span>
+                </div>
+                <div class="sequence-item">
+                    <select id="seq_mito"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+                    <span>Chemical bonds of glucose and oxygen are broken inside the mitochondria.</span>
+                </div>
+                <div class="sequence-item">
+                    <select id="seq_breathe"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+                    <span>Animal breathes in oxygen gas through respiratory alveoli.</span>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="navTo('screen-welcome')">⬅ Back</button>
+                <button class="btn" onclick="navTo('screen-mod2')">Next: Organism Matrix ➔</button>
+            </div>
+        </div>
+
+        <!-- MODULE 2: COMPARATIVE MATRIX -->
+        <div id="screen-mod2" class="screen">
+            <h2>Module 2: Organism Matrix</h2>
+            <div class="instructions">
+                <strong>Task:</strong> Classify the structural and metabolic properties for each organism below. Remember the differences between Eukaryotes and Prokaryotes!
+            </div>
+
+            <div class="matrix-container">
+                <!-- Oak Tree -->
+                <div class="matrix-card">
+                    <div class="matrix-card-header">🌳 Oak Tree (Plant Cell)</div>
+                    <div class="matrix-card-body">
+                        <div class="matrix-field">
+                            <label>Cell Type</label>
+                            <select id="mat_oak_type">
+                                <option value="">- Select -</option>
+                                <option value="euk">Eukaryote</option>
+                                <option value="prok">Prokaryote</option>
+                            </select>
+                        </div>
+                        <div class="matrix-field">
+                            <label>Respiration Site</label>
+                            <select id="mat_oak_site">
+                                <option value="">- Select -</option>
+                                <option value="mito">Mitochondria</option>
+                                <option value="cyto">Cytoplasm Only</option>
+                            </select>
+                        </div>
+                        <div class="matrix-field">
+                            <label>Pathway</label>
+                            <select id="mat_oak_path">
+                                <option value="">- Select -</option>
+                                <option value="aero">Aerobic (Requires O2)</option>
+                                <option value="anaero">Anaerobic (No O2)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- E. coli Bacteria -->
+                <div class="matrix-card">
+                    <div class="matrix-card-header">🦠 E. coli Bacteria</div>
+                    <div class="matrix-card-body">
+                        <div class="matrix-field">
+                            <label>Cell Type</label>
+                            <select id="mat_bac_type">
+                                <option value="">- Select -</option>
+                                <option value="euk">Eukaryote</option>
+                                <option value="prok">Prokaryote</option>
+                            </select>
+                        </div>
+                        <div class="matrix-field">
+                            <label>Respiration Site</label>
+                            <select id="mat_bac_site">
+                                <option value="">- Select -</option>
+                                <option value="mito">Mitochondria</option>
+                                <option value="cyto">Cytoplasm Only</option>
+                            </select>
+                        </div>
+                        <div class="matrix-field">
+                            <label>Pathway</label>
+                            <select id="mat_bac_path">
+                                <option value="">- Select -</option>
+                                <option value="aero">Aerobic Only</option>
+                                <option value="anaero">Anaerobic Only</option>
+                                <option value="both">Both (Flexible based on O2)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Human Muscle (Resting) -->
+                <div class="matrix-card">
+                    <div class="matrix-card-header">🏃 Human Muscle (Resting)</div>
+                    <div class="matrix-card-body">
+                        <div class="matrix-field">
+                            <label>Cell Type</label>
+                            <select id="mat_hum_type">
+                                <option value="">- Select -</option>
+                                <option value="euk">Eukaryote</option>
+                                <option value="prok">Prokaryote</option>
+                            </select>
+                        </div>
+                        <div class="matrix-field">
+                            <label>Respiration Site</label>
+                            <select id="mat_hum_site">
+                                <option value="">- Select -</option>
+                                <option value="mito">Mitochondria</option>
+                                <option value="cyto">Cytoplasm Only</option>
+                            </select>
+                        </div>
+                        <div class="matrix-field">
+                            <label>Pathway</label>
+                            <select id="mat_hum_path">
+                                <option value="">- Select -</option>
+                                <option value="aero">Aerobic (High ATP)</option>
+                                <option value="anaero">Anaerobic (Low ATP)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="navTo('screen-mod1')">⬅ Back</button>
+                <button class="btn" onclick="navTo('screen-mod3')">Next: Synthesis ➔</button>
+            </div>
+        </div>
+
+        <!-- MODULE 3: MISCONCEPTIONS (SYNTHESIS) -->
+        <div id="screen-mod3" class="screen">
+            <h2>Module 3: Scientific Synthesis</h2>
+            <div class="instructions">
+                <strong>Task:</strong> Resolve common scientific misconceptions regarding energy transformation and cellular organelles.
+            </div>
+
+            <div class="quiz-item">
+                <label class="question">1. TRUE or FALSE: Plants only perform photosynthesis and do not need to perform cellular respiration.</label>
+                <div class="radio-group">
+                    <label class="radio-label"><input type="radio" name="q1" value="t"> TRUE: They have chloroplasts to make sugar, so they don't need mitochondria.</label>
+                    <label class="radio-label"><input type="radio" name="q1" value="f"> FALSE: Plants must use mitochondria to break down their manufactured glucose into usable ATP to survive.</label>
+                </div>
+            </div>
+
+            <div class="quiz-item">
+                <label class="question">2. Why does Aerobic Respiration produce significantly more usable ATP energy than Anaerobic Respiration (Fermentation)?</label>
+                <div class="radio-group">
+                    <label class="radio-label"><input type="radio" name="q2" value="wrong1"> Anaerobic respiration creates extra lactic acid, which uses up all the ATP.</label>
+                    <label class="radio-label"><input type="radio" name="q2" value="correct"> Aerobic respiration uses Oxygen to completely dismantle the glucose bonds, maximizing energy release.</label>
+                    <label class="radio-label"><input type="radio" name="q2" value="wrong2"> Aerobic respiration happens in the cytoplasm, which is larger than the mitochondria.</label>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="navTo('screen-mod2')">⬅ Back</button>
+                <button class="btn" onclick="gradeAssessment()" style="background-color: var(--success); box-shadow: 0 4px 0 #4a7791;">Submit & Grade ➔</button>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="screen-results" class="screen">
+            <h2>Metabolic Audit Results</h2>
+            <div id="score-display">0%</div>
+            <div id="feedback-box" class="feedback-box"></div>
+            
+            <div style="text-align: center; margin-top: 30px;" id="results-actions">
+                <!-- Dynamically injected buttons -->
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="screen-game" class="screen">
+            <h2>The Vascular Expressway</h2>
+            <p style="text-align: center;"><strong>Mission:</strong> Pilot the Red Blood Cell courier. Collect Glucose (G) and Oxygen (O₂) flowing in the plasma, and deliver them to the Mitochondrion (Base) for Aerobic Synthesis! Avoid Blood Clots (Obstacles)!</p>
+            
+            <div id="game-container">
+                <div class="game-hud">
+                    <span id="hud-score">ATP: 0 / 360</span>
+                    <span id="hud-health">Health: ❤️❤️❤️</span>
+                </div>
+                
+                <div class="game-inventory" id="hud-inventory">
+                    <span>🍬 Glucose: 0</span>
+                    <span>🌬️ Oxygen: 0</span>
+                </div>
+
+                <canvas id="gameCanvas" width="700" height="450"></canvas>
+                
+                <div id="overlay-start" class="game-overlay active">
+                    <h3 style="font-size:2rem; margin-bottom:10px; color:var(--accent);">Ready for Transport?</h3>
+                    <p style="font-size:1.1rem; max-width:80%;">1. Touch/Drag or Use Arrow Keys to move.<br>2. Grab exactly 1 Glucose + 1 Oxygen.<br>3. Touch the Orange Mitochondrion at the bottom to yield 36 ATP.<br>4. Generate 360 ATP to win!</p>
+                    <button class="btn" style="margin-top:20px; font-size:1.2rem;" onclick="startGame()">Start Relay</button>
+                </div>
+
+                <div id="overlay-end" class="game-overlay">
+                    <h3 id="end-title" style="font-size:2.5rem; margin-bottom:10px;">Simulation Over</h3>
+                    <p id="end-msg" style="font-size:1.2rem;"></p>
+                    <button class="btn" style="margin-top:20px;" onclick="resetGameUI()">Return to Dispatch</button>
+                </div>
+            </div>
+            <div class="controls-hint">Desktop: Arrow Keys | Mobile/Tablet: Touch and drag anywhere on the game area.</div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Navigation ---
+        function navTo(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        // --- Grading Logic ---
+        function gradeAssessment() {
+            let maxPoints = 16; // 5 sequence + 9 matrix + 2 synthesis
+            let score = 0;
+
+            // 1. Check Sequence (5 points)
+            // Correct order: digest(1), breathe(2) [or 1 and 2 interchangeable but prompt says digest then breathe, let's accept either for 1 & 2], blood(3), mito(4), waste(5).
+            // Actually, Flow Chart explicitly says: 1(Eat/Digest), 2(Breathe), 3(Blood delivery), 4(Mito bonds broken), 5(Energy/Waste).
+            // Based on my dropdowns: digest=1, breathe=2, blood=3, mito=4, waste=5
+            if(document.getElementById('seq_digest').value === "1") score++;
+            if(document.getElementById('seq_breathe').value === "2") score++;
+            if(document.getElementById('seq_blood').value === "3") score++;
+            if(document.getElementById('seq_mito').value === "4") score++;
+            if(document.getElementById('seq_waste').value === "5") score++;
+
+            // Allow 1 and 2 to be swapped logically (eat vs breathe order)
+            if(document.getElementById('seq_digest').value === "2" && document.getElementById('seq_breathe').value === "1") {
+                score += 2; // refund points if swapped
+            }
+
+            // 2. Check Matrix (9 points)
+            // Oak
+            if(document.getElementById('mat_oak_type').value === "euk") score++;
+            if(document.getElementById('mat_oak_site').value === "mito") score++;
+            if(document.getElementById('mat_oak_path').value === "aero") score++;
+            // Bac
+            if(document.getElementById('mat_bac_type').value === "prok") score++;
+            if(document.getElementById('mat_bac_site').value === "cyto") score++;
+            if(document.getElementById('mat_bac_path').value === "both") score++;
+            // Hum
+            if(document.getElementById('mat_hum_type').value === "euk") score++;
+            if(document.getElementById('mat_hum_site').value === "mito") score++;
+            if(document.getElementById('mat_hum_path').value === "aero") score++;
+
+            // 3. Check Synthesis (2 points)
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            if(q1 && q1.value === "f") score++;
+            if(q2 && q2.value === "correct") score++;
+
+            // Calculate & Display
+            const percentage = Math.round((score / maxPoints) * 100);
+            
+            navTo('screen-results');
+            const scoreDisp = document.getElementById('score-display');
+            const feedback = document.getElementById('feedback-box');
+            const actions = document.getElementById('results-actions');
+
+            scoreDisp.innerText = percentage + '%';
+
+            if(percentage >= 80) {
+                feedback.className = 'feedback-box pass';
+                feedback.innerHTML = `<strong>Mastery Verified!</strong> Excellent work mapping the systemic flow and distinguishing aerobic from anaerobic pathways. You are cleared for the vascular simulation.`;
+                actions.innerHTML = `<button class="btn" onclick="navTo('screen-game')" style="background-color:var(--success);">Launch Simulation ➔</button>`;
+            } else {
+                feedback.className = 'feedback-box fail';
+                feedback.innerHTML = `<strong>Review Required.</strong> You scored ${score} out of ${maxPoints}. Please review the organelle mechanics and plant misconceptions, then try again.`;
+                actions.innerHTML = `<button class="btn btn-secondary" onclick="navTo('screen-mod1')">Retry Modules ↻</button>`;
+            }
+        }
+
+
+        // --- GAME LOGIC (Canvas) ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let gameActive = false;
+        let animId;
+        let lastTime = 0;
+
+        // Game State
+        let atpScore = 0;
+        let health = 3;
+        let invGlucose = 0;
+        let invOxygen = 0;
+        let spawnTimer = 0;
+
+        // Player (Red Blood Cell Courier)
+        let player = {
+            x: 350, y: 300, 
+            r: 25, 
+            speed: 5
+        };
+
+        // Entities
+        let items = []; // Collectibles and obstacles
+        // Mitochondrion base (Bottom zone)
+        let base = {
+            x: 0, y: canvas.height - 60,
+            w: canvas.width, h: 60
+        };
+
+        // Inputs
+        let keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false };
+        let touchTarget = null;
+
+        // Listeners
+        window.addEventListener('keydown', e => { if(keys.hasOwnProperty(e.key)) keys[e.key] = true; });
+        window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key)) keys[e.key] = false; });
+
+        // Touch/Mouse logic
+        canvas.addEventListener('touchstart', handleTouch, {passive: false});
+        canvas.addEventListener('touchmove', handleTouch, {passive: false});
+        canvas.addEventListener('touchend', () => { touchTarget = null; });
+        
+        canvas.addEventListener('mousedown', handleMouse);
+        canvas.addEventListener('mousemove', e => { if(e.buttons === 1) handleMouse(e); });
+        canvas.addEventListener('mouseup', () => { touchTarget = null; });
+
+        function handleTouch(e) {
+            e.preventDefault();
+            if(!gameActive) return;
+            const rect = canvas.getBoundingClientRect();
+            touchTarget = {
+                x: (e.touches[0].clientX - rect.left) * (canvas.width / rect.width),
+                y: (e.touches[0].clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+        function handleMouse(e) {
+            if(!gameActive) return;
+            const rect = canvas.getBoundingClientRect();
+            touchTarget = {
+                x: (e.clientX - rect.left) * (canvas.width / rect.width),
+                y: (e.clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        function resizeCanvas() {
+            // Internal resolution stays constant, CSS scales it.
+            base.w = canvas.width;
+            base.y = canvas.height - 60;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function spawnEntity() {
+            const r = Math.random();
+            let type = 'oxygen';
+            if (r > 0.4 && r <= 0.8) type = 'glucose';
+            if (r > 0.8) type = 'clot';
+
+            let size = type === 'clot' ? 30 : 20;
+            let x = Math.random() * (canvas.width - size*2) + size;
+            let speed = 2 + Math.random() * 2.5;
+
+            items.push({ type, x, y: -40, size, speed });
+        }
+
+        function update(dt) {
+            if(!gameActive) return;
+
+            // Player Movement (Keyboard)
+            if(keys.ArrowLeft) player.x -= player.speed;
+            if(keys.ArrowRight) player.x += player.speed;
+            if(keys.ArrowUp) player.y -= player.speed;
+            if(keys.ArrowDown) player.y += player.speed;
+
+            // Player Movement (Touch/Mouse)
+            if(touchTarget) {
+                let dx = touchTarget.x - player.x;
+                let dy = touchTarget.y - player.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if(dist > player.speed) {
+                    player.x += (dx / dist) * player.speed;
+                    player.y += (dy / dist) * player.speed;
+                }
+            }
+
+            // Player bounds checking
+            player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
+            player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
+
+            // Spawning
+            spawnTimer += dt;
+            if(spawnTimer > 700) { // Spawn every 0.7s
+                spawnEntity();
+                spawnTimer = 0;
+            }
+
+            // Update Items & Collision
+            for(let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+                item.y += item.speed;
+
+                // Collision with player (Circle vs Circle/Rect approx)
+                let dist = Math.hypot(player.x - item.x, player.y - item.y);
+                if (dist < player.r + item.size/2) {
+                    collectItem(item.type);
+                    items.splice(i, 1);
+                    continue;
+                }
+
+                // Remove off-screen
+                if(item.y > canvas.height + 50) {
+                    items.splice(i, 1);
+                }
+            }
+
+            // Delivery logic (Intersect with Base Mitochondrion)
+            if (player.y + player.r > base.y) {
+                if(invGlucose >= 1 && invOxygen >= 1) {
+                    // Successful Aerobic Delivery
+                    invGlucose--;
+                    invOxygen--;
+                    atpScore += 36;
+                    updateHUD();
+                    
+                    // Visual feedback flash
+                    ctx.fillStyle = "rgba(102, 155, 188, 0.4)";
+                    ctx.fillRect(0,0,canvas.width, canvas.height);
+                    
+                    if(atpScore >= 360) endGame(true, "Incredible! 360 ATP generated. The muscles have maximum power!");
+                }
+            }
+
+            if(health <= 0) {
+                endGame(false, "Vascular failure. Too many blood clots hit!");
+            }
+        }
+
+        function collectItem(type) {
+            if(type === 'glucose') invGlucose++;
+            if(type === 'oxygen') invOxygen++;
+            if(type === 'clot') {
+                health--;
+                // Red flash
+                ctx.fillStyle = "rgba(214, 40, 40, 0.5)";
+                ctx.fillRect(0,0,canvas.width, canvas.height);
+            }
+            updateHUD();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if(!gameActive) return;
+
+            // Draw Base (Mitochondrion)
+            ctx.fillStyle = '#f4a261';
+            ctx.beginPath();
+            ctx.ellipse(canvas.width/2, base.y + 30, canvas.width/1.2, 50, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Mitochondrion details (Cristae)
+            ctx.strokeStyle = '#e76f51';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            for(let i=50; i<canvas.width; i+=80) {
+                ctx.moveTo(i, base.y+10);
+                ctx.quadraticCurveTo(i+40, base.y+60, i+80, base.y+10);
+            }
+            ctx.stroke();
+
+            // Draw Items
+            items.forEach(item => {
+                if(item.type === 'glucose') {
+                    // Orange Hexagon
+                    ctx.fillStyle = '#fca311';
+                    ctx.beginPath();
+                    for(let i=0; i<6; i++) {
+                        ctx.lineTo(item.x + item.size * Math.cos(i * Math.PI / 3), 
+                                   item.y + item.size * Math.sin(i * Math.PI / 3));
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = "white"; ctx.font="14px Arial"; ctx.textAlign="center"; ctx.fillText("G", item.x, item.y+5);
+                } else if(item.type === 'oxygen') {
+                    // Double blue circle (O2)
+                    ctx.fillStyle = '#90e0ef';
+                    ctx.beginPath(); ctx.arc(item.x - 5, item.y, item.size/2, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(item.x + 5, item.y, item.size/2, 0, Math.PI*2); ctx.fill();
+                } else if(item.type === 'clot') {
+                    // Brown irregular clot
+                    ctx.fillStyle = '#4a2511';
+                    ctx.beginPath();
+                    ctx.arc(item.x, item.y, item.size/2, 0, Math.PI*2);
+                    ctx.arc(item.x+10, item.y+5, item.size/2.5, 0, Math.PI*2);
+                    ctx.arc(item.x-8, item.y-5, item.size/3, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            });
+
+            // Draw Player (Red Blood Cell)
+            ctx.fillStyle = '#d62828';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
+            ctx.fill();
+            // inner indent (biconcave disc look)
+            ctx.fillStyle = 'rgba(120, 0, 0, 0.4)';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r * 0.5, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        function gameLoop(timestamp) {
+            let dt = timestamp - lastTime;
+            lastTime = timestamp;
+
+            update(dt);
+            draw();
+
+            if(gameActive) {
+                animId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-score').innerText = `ATP: ${atpScore} / 360`;
+            document.getElementById('hud-health').innerText = `Health: ${'❤️'.repeat(Math.max(0, health))}`;
+            document.getElementById('hud-inventory').innerHTML = `<span>🍬 Glucose: ${invGlucose}</span><span>🌬️ Oxygen: ${invOxygen}</span>`;
+        }
+
+        function startGame() {
+            document.getElementById('overlay-start').classList.remove('active');
+            document.getElementById('overlay-end').classList.remove('active');
+            
+            // Reset vars
+            atpScore = 0; health = 3; invGlucose = 0; invOxygen = 0; items = [];
+            player.x = canvas.width / 2; player.y = canvas.height / 2;
+            keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false };
+            touchTarget = null;
+            
+            updateHUD();
+            gameActive = true;
+            lastTime = performance.now();
+            
+            gameLoop(performance.now());
+        }
+
+        function endGame(win, msgText) {
+            gameActive = false;
+            const overlay = document.getElementById('overlay-end');
+            const title = document.getElementById('end-title');
+            const msg = document.getElementById('end-msg');
+            
+            overlay.classList.add('active');
+            if(win) {
+                title.innerText = "Target Reached! 🏆";
+                title.style.color = "var(--accent)";
+            } else {
+                title.innerText = "Delivery Failed ❌";
+                title.style.color = "var(--danger)";
+            }
+            msg.innerText = msgText;
+        }
+
+        function resetGameUI() {
+            document.getElementById('overlay-end').classList.remove('active');
+            document.getElementById('overlay-start').classList.add('active');
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+        }
+
+    </script>
+</body>
+</html>

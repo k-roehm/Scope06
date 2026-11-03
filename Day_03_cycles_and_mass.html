@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Day 3: Interconnected Cycles & Mass</title>
+    <style>
+        /* --- CSS Variables & Theming --- */
+        :root {
+            --plant-green: #2d6a4f;
+            --plant-light: #d8f3dc;
+            --mito-orange: #d62828;
+            --mito-light: #ffe5d9;
+            --energy-yellow: #ffb703;
+            --water-blue: #0077b6;
+            --dark: #023047;
+            --light: #f8f9fa;
+            --white: #ffffff;
+            --gray: #6c757d;
+            --radius: 12px;
+            --shadow: 0 6px 15px rgba(0,0,0,0.08);
+            --border: 2px solid #e9ecef;
+        }
+
+        /* --- Resets & Base Styles --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #ebf2fa;
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--plant-green), var(--dark));
+            color: var(--white);
+            width: 100%;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            color: var(--energy-yellow);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 2rem 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Screen Navigation --- */
+        .screen {
+            display: none;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: var(--plant-green);
+            margin-bottom: 1.2rem;
+            font-size: 1.6rem;
+            border-bottom: 3px solid var(--energy-yellow);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        p { margin-bottom: 1rem; }
+
+        .instructions {
+            background: #eef2f3;
+            border-left: 5px solid var(--energy-yellow);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 25px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            background-color: var(--plant-green);
+            color: var(--white);
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #1b4332;
+            text-align: center;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1b4332;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background-color: var(--gray);
+            box-shadow: 0 4px 0 #495057;
+        }
+        .btn-secondary:hover { box-shadow: 0 2px 0 #495057; }
+
+        .btn-accent {
+            background-color: var(--mito-orange);
+            box-shadow: 0 4px 0 #9b2226;
+        }
+        .btn-accent:hover { box-shadow: 0 2px 0 #9b2226; }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* --- Module 1: Cycle Diagram --- */
+        .cycle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            background: var(--light);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: var(--border);
+        }
+
+        .organelle-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .chloro-box {
+            background: var(--plant-light);
+            color: var(--plant-green);
+            border: 2px solid var(--plant-green);
+        }
+
+        .mito-box {
+            background: var(--mito-light);
+            color: var(--mito-orange);
+            border: 2px solid var(--mito-orange);
+        }
+
+        .arrow-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .arrow-label {
+            font-size: 1.5rem;
+            color: var(--gray);
+            font-weight: bold;
+        }
+
+        .select-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .select-group select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid #ccc;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            background: var(--white);
+            flex: 1;
+            min-width: 140px;
+            max-width: 200px;
+        }
+
+        .select-group select:focus { border-color: var(--plant-green); }
+
+        /* --- Module 2: Ledger --- */
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .ledger-table th, .ledger-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .ledger-table th {
+            background: var(--dark);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .ledger-table tr:last-child td { border-bottom: none; }
+
+        .ledger-table select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 80px;
+            text-align: center;
+        }
+
+        .equation-bar {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        /* --- Module 3: Synthesis --- */
+        .quiz-card {
+            background: var(--white);
+            border: var(--border);
+            border-left: 5px solid var(--water-blue);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .quiz-card label.question {
+            display: block;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .radio-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-options label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 15px;
+            background: var(--light);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .radio-options label:hover {
+            background: #e0fbfc;
+            border-color: var(--water-blue);
+        }
+
+        input[type="radio"] {
+            margin-top: 4px;
+            transform: scale(1.3);
+            accent-color: var(--water-blue);
+        }
+
+        /* --- Results --- */
+        .results-box {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--light);
+            border: 10px solid var(--plant-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--dark);
+            margin: 0 auto 20px;
+        }
+
+        .feedback-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .pass { background: #d8f3dc; color: #1b4332; border: 2px solid #95d5b2; }
+        .fail { background: #ffe5d9; color: #9b2226; border: 2px solid #f4a261; }
+
+        /* --- Game UI --- */
+        #game-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: #111;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 500px;
+            touch-action: none;
+            background: linear-gradient(to bottom, #87ceeb, #e0f6ff);
+        }
+
+        .game-ui-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+        }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            color: var(--dark);
+            font-weight: 900;
+            font-size: 1.2rem;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.7);
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(2, 48, 71, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            pointer-events: auto;
+            transition: opacity 0.3s;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .game-btn {
+            background: var(--energy-yellow);
+            color: var(--dark);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 0 #b58500;
+            text-transform: uppercase;
+        }
+        .game-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        .game-legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .nav-buttons .btn { width: 100%; }
+            canvas { height: 400px; }
+            .ledger-table th, .ledger-table td { padding: 10px 5px; font-size: 0.9rem; }
+            .ledger-table select { width: 60px; padding: 5px; }
+            header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Bio-Energy Lab 03</h1>
+        <p>Interconnected Cycles & Conservation of Mass</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- Welcome Screen -->
+        <div id="screen-welcome" class="screen active">
+            <h2>Welcome, Biosphere Auditor!</h2>
+            <p>Matter cycles in a closed loop, while energy flows unidirectionally. Your mission is to audit the atomic exchanges between plants and animals to prove the Law of Conservation of Mass.</p>
+            <p><strong>Briefing:</strong> Complete three analysis modules. You must score <strong>80% or higher</strong> to unlock the <em>Biosphere Sorter</em> simulator, where you will manage the active ecosystem!</p>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn" onclick="navTo('screen-mod1')">Initiate Audit ➔</button>
+            </div>
+        </div>
+
+        <!-- Module 1: Cycle Mapping -->
+        <div id="screen-mod1" class="screen">
+            <h2>Module 1: The Reciprocal Cycle</h2>
+            <div class="instructions">
+                <strong>Task:</strong> Map the chemical outputs of each organelle to the inputs of the other to complete the closed matter loop.
+            </div>
+
+            <div class="cycle-container">
+                <div class="organelle-box chloro-box">
+                    🌿 Chloroplast (Photosynthesis)
+                </div>
+                
+                <div class="arrow-section">
+                    <div class="arrow-label">⬇️ Produces & Sends ⬇️</div>
+                    <div class="select-group">
+                        <select id="m1-c-out1">
+                            <option value="">- Select Product 1 -</option>
+                            <option value="gluc">Glucose (C6H12O6)</option>
+                            <option value="o2">Oxygen (6O2)</option>
+                            <option value="co2">Carbon Dioxide (6CO2)</option>
+                            <option value="h2o">Water (6H2O)</option>
+                        </select>
+                        <select id="m1-c-out2">
+                            <option value="">- Select Product 2 -</option>
+                            <option value="gluc">Glucose (C6H12O6)</option>
+                            <option value="o2">Oxygen (6O2)</option>
+                            <option value="co2">Carbon Dioxide (6CO2)</option>
+                            <option value="h2o">Water (6H2O)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="organelle-box mito-box">
+                    ⚡ Mitochondrion (Cellular Respiration)
+                </div>
+
+                <div class="arrow-section">
+                    <div class="arrow-label">⬆️ Produces & Returns ⬆️</div>
+                    <div class="select-group">
+                        <select id="m1-m-out1">
+                            <option value="">- Select Waste 1 -</option>
+                            <option value="gluc">Glucose (C6H12O6)</option>
+                            <option value="o2">Oxygen (6O2)</option>
+                            <option value="co2">Carbon Dioxide (6CO2)</option>
+                            <option value="h2o">Water (6H2O)</option>
+                        </select>
+                        <select id="m1-m-out2">
+                            <option value="">- Select Waste 2 -</option>
+                            <option value="gluc">Glucose (C6H12O6)</option>
+                            <option value="o2">Oxygen (6O2)</option>
+                            <option value="co2">Carbon Dioxide (6CO2)</option>
+                            <option value="h2o">Water (6H2O)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="navTo('screen-welcome')">⬅ Back</button>
+                <button class="btn" onclick="navTo('screen-mod2')">Next: Atomic Ledger ➔</button>
+            </div>
+        </div>
+
+        <!-- Module 2: Atomic Ledger -->
+        <div id="screen-mod2" class="screen">
+            <h2>Module 2: Atomic Mass Ledger</h2>
+            <div class="instructions">
+                <strong>Task (TN 7.PS3.2):</strong> Audit the atoms for cellular respiration to prove that mass is conserved. Select the correct atom counts for both sides of the equation.
+            </div>
+
+            <div class="equation-bar">
+                C₆H₁₂O₆ + 6O₂ &nbsp; ➔ &nbsp; 6CO₂ + 6H₂O + ATP
+            </div>
+
+            <table class="ledger-table">
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th>Reactants (Left)</th>
+                        <th>Products (Right)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Carbon (C)</strong></td>
+                        <td>
+                            <select id="r-c"><option value="">-</option><option value="6">6</option><option value="12">12</option><option value="18">18</option></select>
+                        </td>
+                        <td>
+                            <select id="p-c"><option value="">-</option><option value="6">6</option><option value="12">12</option><option value="18">18</option></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hydrogen (H)</strong></td>
+                        <td>
+                            <select id="r-h"><option value="">-</option><option value="6">6</option><option value="12">12</option><option value="18">18</option></select>
+                        </td>
+                        <td>
+                            <select id="p-h"><option value="">-</option><option value="6">6</option><option value="12">12</option><option value="18">18</option></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Oxygen (O)</strong></td>
+                        <td>
+                            <select id="r-o"><option value="">-</option><option value="6">6</option><option value="12">12</option><option value="18">18</option></select>
+                        </td>
+                        <td>
+                            <select id="p-o"><option value="">-</option><option value="6">6</option><option value="12">12</option><option value="18">18</option></select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="navTo('screen-mod1')">⬅ Back</button>
+                <button class="btn" onclick="navTo('screen-mod3')">Next: Ecosystem Synthesis ➔</button>
+            </div>
+        </div>
+
+        <!-- Module 3: Synthesis -->
+        <div id="screen-mod3" class="screen">
+            <h2>Module 3: Ecosystem Synthesis</h2>
+            <div class="instructions">
+                <strong>Task:</strong> Resolve common misconceptions regarding energy flow and organelle dependency.
+            </div>
+
+            <div class="quiz-card">
+                <label class="question">1. In a sealed terrarium, matter cycles continuously in a closed loop. What happens to the Solar Energy that enters?</label>
+                <div class="radio-options">
+                    <label><input type="radio" name="q1" value="wrong1"> It is recycled endlessly between the plant and the snail.</label>
+                    <label><input type="radio" name="q1" value="correct"> It flows unidirectionally: captured by plants, converted to ATP, and eventually dissipates as thermal heat.</label>
+                    <label><input type="radio" name="q1" value="wrong2"> It is destroyed and completely disappears when glucose is broken down.</label>
+                </div>
+            </div>
+
+            <div class="quiz-card">
+                <label class="question">2. Evaluate this claim: "Plant cells do not need mitochondria because they make their own food using chloroplasts."</label>
+                <div class="radio-options">
+                    <label><input type="radio" name="q2" value="wrong1"> True. Chloroplasts produce ATP directly from sunlight for the plant to use.</label>
+                    <label><input type="radio" name="q2" value="correct"> False. Chloroplasts make glucose, but plants still need mitochondria to break that glucose down into usable ATP.</label>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="navTo('screen-mod2')">⬅ Back</button>
+                <button class="btn" onclick="gradeAudit()" style="background-color: var(--water-blue); box-shadow: 0 4px 0 #023e8a;">Submit Audit ➔</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="screen-results" class="screen">
+            <div class="results-box">
+                <h2>Audit Complete</h2>
+                <div class="score-circle" id="score-circle">0%</div>
+                <div class="feedback-text" id="feedback-text"></div>
+                <div id="results-action"></div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="screen-game" class="screen">
+            <h2>Biosphere Sorter</h2>
+            <p style="text-align: center; margin-bottom: 10px; font-weight: 600;">Maintain the ecosystem! Tap falling molecules to route them to the correct organelle.</p>
+            
+            <div id="game-wrapper">
+                <div class="game-ui-layer">
+                    <div class="hud">
+                        <div id="hud-score">Balance: 0 / 20</div>
+                        <div id="hud-health">Health: ❤️❤️❤️</div>
+                    </div>
+                </div>
+
+                <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+                <!-- Start Overlay -->
+                <div id="overlay-start" class="overlay">
+                    <h2 style="font-size: 2.5rem; color: var(--energy-yellow); margin-bottom: 15px;">Ecosystem Control</h2>
+                    <p style="font-size: 1.1rem; max-width: 80%; line-height: 1.5;">
+                        Matter is falling from the atmosphere!<br><br>
+                        <strong>TAP</strong> an item to push it to the other side.<br>
+                        Route ☀️, ☁️ (CO₂), 💧 (H₂O) to the <strong>Chloroplast (Left)</strong>.<br>
+                        Route 🍬 (Glucose), 💨 (O₂) to the <strong>Mitochondrion (Right)</strong>.
+                    </p>
+                    <div class="game-legend">
+                        <div>⬅️ 🌿 Chloroplast: ☀️ ☁️ 💧</div>
+                        <div>➡️ ⚡ Mitochondrion: 🍬 💨</div>
+                    </div>
+                    <button class="game-btn" onclick="startGame()">Start Simulation</button>
+                </div>
+
+                <!-- End Overlay -->
+                <div id="overlay-end" class="overlay hidden">
+                    <h2 id="end-title" style="font-size: 2.5rem; margin-bottom: 15px;">Game Over</h2>
+                    <p id="end-msg" style="font-size: 1.2rem; margin-bottom: 25px;"></p>
+                    <button class="game-btn" onclick="resetGameUI()">Return to Menu</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Navigation & State ---
+        function navTo(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        // --- Grading Logic ---
+        function gradeAudit() {
+            let score = 0;
+            const maxScore = 12; // 4 (cycle) + 6 (ledger) + 2 (quiz)
+
+            // 1. Cycle Logic (Chloroplast outputs Glucose/O2, Mitochondrion outputs CO2/H2O)
+            const cOut1 = document.getElementById('m1-c-out1').value;
+            const cOut2 = document.getElementById('m1-c-out2').value;
+            const cOuts = [cOut1, cOut2];
+            if (cOuts.includes('gluc')) score++;
+            if (cOuts.includes('o2')) score++;
+
+            const mOut1 = document.getElementById('m1-m-out1').value;
+            const mOut2 = document.getElementById('m1-m-out2').value;
+            const mOuts = [mOut1, mOut2];
+            if (mOuts.includes('co2')) score++;
+            if (mOuts.includes('h2o')) score++;
+
+            // 2. Ledger Logic (Reactants & Products: C=6, H=12, O=18)
+            if (document.getElementById('r-c').value === "6") score++;
+            if (document.getElementById('p-c').value === "6") score++;
+            if (document.getElementById('r-h').value === "12") score++;
+            if (document.getElementById('p-h').value === "12") score++;
+            if (document.getElementById('r-o').value === "18") score++;
+            if (document.getElementById('p-o').value === "18") score++;
+
+            // 3. Quiz Logic
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            if (q1 && q1.value === "correct") score++;
+            if (q2 && q2.value === "correct") score++;
+
+            // Calculate Percentage
+            const percentage = Math.round((score / maxScore) * 100);
+            
+            // Display Results
+            navTo('screen-results');
+            const circle = document.getElementById('score-circle');
+            const feedback = document.getElementById('feedback-text');
+            const action = document.getElementById('results-action');
+
+            circle.innerText = `${percentage}%`;
+
+            if (percentage >= 80) {
+                circle.style.borderColor = "var(--plant-green)";
+                circle.style.color = "var(--plant-green)";
+                feedback.className = "feedback-text pass";
+                feedback.innerHTML = "<strong>Audit Verified!</strong> You successfully proved the Law of Conservation of Mass and mapped the ecosystem cycles. You are cleared for the simulator.";
+                action.innerHTML = `<button class="btn btn-accent" onclick="navTo('screen-game')">Launch Biosphere Sorter ➔</button>`;
+            } else {
+                circle.style.borderColor = "var(--mito-orange)";
+                circle.style.color = "var(--mito-orange)";
+                feedback.className = "feedback-text fail";
+                feedback.innerHTML = `<strong>Audit Failed.</strong> You scored ${score}/${maxScore}. Please review the atomic counts (C=6, H=12, O=18) and organelle functions.`;
+                action.innerHTML = `<button class="btn btn-secondary" onclick="navTo('screen-mod1')">Retry Modules ↻</button>`;
+            }
+        }
+
+        // --- HTML5 Canvas Game: Biosphere Sorter ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let gameActive = false;
+        let animId;
+        let lastTime = 0;
+        let spawnTimer = 0;
+
+        // Game State
+        let score = 0;
+        let health = 3;
+        let items = [];
+        
+        // Configuration
+        const TARGET_SCORE = 20;
+        const ITEM_TYPES = [
+            { id: 'sun', symbol: '☀️', target: 'left' },
+            { id: 'co2', symbol: '☁️', target: 'left' },
+            { id: 'h2o', symbol: '💧', target: 'left' },
+            { id: 'gluc', symbol: '🍬', target: 'right' },
+            { id: 'o2', symbol: '💨', target: 'right' }
+        ];
+
+        // Resize handler for canvas
+        function resize() {
+            const wrapper = document.getElementById('game-wrapper');
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight || 500;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Input Handling (Tapping items)
+        canvas.addEventListener('mousedown', handleInteraction);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling while playing
+            handleInteraction(e.touches[0]);
+        }, {passive: false});
+
+        function handleInteraction(e) {
+            if (!gameActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const tapX = (e.clientX - rect.left) * scaleX;
+            const tapY = (e.clientY - rect.top) * scaleY;
+
+            // Check if an item was tapped
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+                let dist = Math.hypot(item.x - tapX, item.y - tapY);
+                // Hitbox slightly larger than visual size for ease of play
+                if (dist < item.size * 1.5) {
+                    // Tap pushes it to the opposite side
+                    item.vx = (item.x < canvas.width / 2) ? 4 : -4;
+                    // Small upward bump
+                    item.vy = 1; 
+                    
+                    // Visual feedback
+                    createParticles(item.x, item.y);
+                    break; // Only interact with one item per tap
+                }
+            }
+        }
+
+        // Particle system for tap feedback
+        let particles = [];
+        function createParticles(x, y) {
+            for(let i=0; i<5; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    life: 1.0
+                });
+            }
+        }
+
+        function spawnItem() {
+            const typeDef = ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+            const size = 25;
+            
+            // Spawn randomly on left or right side, but sometimes on the wrong side to force interaction
+            const startLeft = Math.random() > 0.5;
+            const x = startLeft ? (canvas.width * 0.25) : (canvas.width * 0.75);
+            
+            items.push({
+                ...typeDef,
+                x: x + (Math.random() * 40 - 20),
+                y: -30,
+                vx: 0,
+                vy: 1.5 + Math.random() * 1.5,
+                size: size,
+                rotation: Math.random() * Math.PI * 2,
+                rotSpeed: (Math.random() - 0.5) * 0.1
+            });
+        }
+
+        function update(dt) {
+            if (!gameActive) return;
+
+            // Spawning
+            spawnTimer += dt;
+            if (spawnTimer > 1200) { // spawn every 1.2s
+                spawnItem();
+                spawnTimer = 0;
+            }
+
+            // Update Items
+            for (let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+                item.x += item.vx;
+                item.y += item.vy;
+                item.rotation += item.rotSpeed;
+                
+                // Gravity acceleration
+                item.vy += 0.02;
+
+                // Wall bounds (bounce off sides)
+                if (item.x - item.size < 0) { item.x = item.size; item.vx *= -0.5; }
+                if (item.x + item.size > canvas.width) { item.x = canvas.width - item.size; item.vx *= -0.5; }
+
+                // Check landing at the bottom zones (bottom 80px)
+                if (item.y > canvas.height - 80) {
+                    const landedLeft = item.x < canvas.width / 2;
+                    
+                    if ((landedLeft && item.target === 'left') || (!landedLeft && item.target === 'right')) {
+                        // Correct Zone!
+                        score++;
+                        flashZone(landedLeft ? 'left' : 'right', 'success');
+                    } else {
+                        // Wrong Zone!
+                        health--;
+                        flashZone(landedLeft ? 'left' : 'right', 'error');
+                    }
+                    
+                    items.splice(i, 1);
+                    updateHUD();
+                    checkWinLoss();
+                }
+            }
+
+            // Update Particles
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy;
+                p.life -= 0.05;
+                if(p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        let flashState = { left: 0, right: 0, leftColor: '', rightColor: '' };
+        function flashZone(side, type) {
+            flashState[side] = 1.0;
+            flashState[side+'Color'] = type === 'success' ? 'rgba(45, 106, 79, ' : 'rgba(214, 40, 40, ';
+        }
+
+        function draw() {
+            // Background is handled by CSS, clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (!gameActive && items.length === 0) return;
+
+            // Draw Center Divider
+            ctx.beginPath();
+            ctx.setLineDash([10, 10]);
+            ctx.moveTo(canvas.width/2, 0);
+            ctx.lineTo(canvas.width/2, canvas.height - 80);
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Bottom Zones
+            // Left: Chloroplast
+            ctx.fillStyle = flashState.left > 0 ? flashState.leftColor + flashState.left + ')' : 'rgba(45, 106, 79, 0.8)';
+            ctx.fillRect(0, canvas.height - 80, canvas.width/2, 80);
+            ctx.fillStyle = "white"; ctx.font = "bold 20px Inter"; ctx.textAlign = "center";
+            ctx.fillText("🌿 Chloroplast", canvas.width/4, canvas.height - 35);
+
+            // Right: Mitochondrion
+            ctx.fillStyle = flashState.right > 0 ? flashState.rightColor + flashState.right + ')' : 'rgba(214, 40, 40, 0.8)';
+            ctx.fillRect(canvas.width/2, canvas.height - 80, canvas.width/2, 80);
+            ctx.fillStyle = "white"; ctx.font = "bold 20px Inter"; ctx.textAlign = "center";
+            ctx.fillText("⚡ Mitochondrion", (canvas.width/4) * 3, canvas.height - 35);
+
+            // Fade flashes
+            if(flashState.left > 0) flashState.left -= 0.05;
+            if(flashState.right > 0) flashState.right -= 0.05;
+
+            // Draw Items
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            items.forEach(item => {
+                ctx.save();
+                ctx.translate(item.x, item.y);
+                ctx.rotate(item.rotation);
+                
+                // Draw background circle for better hit visibility
+                ctx.beginPath();
+                ctx.arc(0, 0, item.size, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(255,255,255,0.8)";
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = item.target === 'left' ? varColor('--plant-green') : varColor('--mito-orange');
+                ctx.stroke();
+
+                ctx.font = `${item.size * 1.2}px Arial`;
+                ctx.fillText(item.symbol, 0, 2); // slight y offset for emoji centering
+                ctx.restore();
+            });
+
+            // Draw Particles
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
+                ctx.fill();
+            });
+        }
+
+        // Helper to get CSS var color for canvas
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        function gameLoop(timestamp) {
+            let dt = timestamp - lastTime;
+            lastTime = timestamp;
+
+            update(dt);
+            draw();
+
+            if (gameActive) {
+                animId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-score').innerText = `Balance: ${score} / ${TARGET_SCORE}`;
+            document.getElementById('hud-health').innerText = `Health: ${'❤️'.repeat(Math.max(0, health))}`;
+        }
+
+        function checkWinLoss() {
+            if (health <= 0) {
+                endGame(false, "Ecosystem collapsed! Incorrect molecules disrupted cellular function.");
+            } else if (score >= TARGET_SCORE) {
+                endGame(true, "Homeostasis Achieved! You perfectly routed matter to sustain life.");
+            }
+        }
+
+        function startGame() {
+            document.getElementById('overlay-start').classList.add('hidden');
+            document.getElementById('overlay-end').classList.add('hidden');
+            
+            score = 0;
+            health = 3;
+            items = [];
+            particles = [];
+            spawnTimer = 0;
+            
+            updateHUD();
+            resize(); // ensure correct dimensions
+            
+            gameActive = true;
+            lastTime = performance.now();
+            animId = requestAnimationFrame(gameLoop);
+        }
+
+        function endGame(isWin, message) {
+            gameActive = false;
+            
+            const overlay = document.getElementById('overlay-end');
+            const title = document.getElementById('end-title');
+            const msg = document.getElementById('end-msg');
+            
+            overlay.classList.remove('hidden');
+            
+            if(isWin) {
+                title.innerText = "Simulation Success! 🌍";
+                title.style.color = "var(--plant-green)";
+            } else {
+                title.innerText = "Simulation Failed ☠️";
+                title.style.color = "var(--mito-orange)";
+            }
+            msg.innerText = message;
+        }
+
+        function resetGameUI() {
+            document.getElementById('overlay-end').classList.add('hidden');
+            document.getElementById('overlay-start').classList.remove('hidden');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    </script>
+</body>
+</html>
